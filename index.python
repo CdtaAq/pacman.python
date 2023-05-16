@@ -1,0 +1,103 @@
+import pygame
+import random
+
+# Colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+
+# Screen dimensions
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+
+# Pacman and enemy dimensions
+PACMAN_RADIUS = 15
+ENEMY_RADIUS = 10
+
+# Pacman movement speed
+PACMAN_SPEED = 5
+
+# Enemy movement speed
+ENEMY_SPEED = 2
+
+class PacmanGame:
+    def __init__(self):
+        self.game_over = False
+        self.score = 0
+
+        pygame.init()
+
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("Pacman Game")
+
+        self.clock = pygame.time.Clock()
+
+        self.pacman = pygame.Rect(SCREEN_WIDTH // 2 - PACMAN_RADIUS, SCREEN_HEIGHT // 2 - PACMAN_RADIUS,
+                                   PACMAN_RADIUS * 2, PACMAN_RADIUS * 2)
+        self.enemies = []
+        for _ in range(6):
+            self.enemies.append(pygame.Rect(random.randint(0, SCREEN_WIDTH - ENEMY_RADIUS),
+                                            random.randint(0, SCREEN_HEIGHT - ENEMY_RADIUS),
+                                            ENEMY_RADIUS * 2, ENEMY_RADIUS * 2))
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.game_over = True
+
+    def move_pacman(self, dx, dy):
+        self.pacman.x += dx
+        self.pacman.y += dy
+
+    def move_enemies(self):
+        for enemy in self.enemies:
+            if enemy.x > self.pacman.x:
+                enemy.x -= ENEMY_SPEED
+            else:
+                enemy.x += ENEMY_SPEED
+
+            if enemy.y > self.pacman.y:
+                enemy.y -= ENEMY_SPEED
+            else:
+                enemy.y += ENEMY_SPEED
+
+    def check_collision(self):
+        for enemy in self.enemies:
+            if self.pacman.colliderect(enemy):
+                self.game_over = True
+
+    def update_score(self):
+        self.score += 1
+
+    def display_score(self):
+        font = pygame.font.Font(None, 36)
+        text = font.render("Score: " + str(self.score), True, WHITE)
+        self.screen.blit(text, (10, 10))
+
+    def display_pacman(self):
+        pygame.draw.circle(self.screen, YELLOW, (self.pacman.x + PACMAN_RADIUS, self.pacman.y + PACMAN_RADIUS),
+                           PACMAN_RADIUS)
+
+    def display_enemies(self):
+        for enemy in self.enemies:
+            pygame.draw.circle(self.screen, BLUE, (enemy.x + ENEMY_RADIUS, enemy.y + ENEMY_RADIUS), ENEMY_RADIUS)
+
+    def display_game_over(self):
+        font = pygame.font.Font(None, 72)
+        text = font.render("Game Over", True, WHITE)
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        self.screen.blit(text, text_rect)
+
+    def run_game(self):
+        while not self.game_over:
+            self.handle_events()
+
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                self.move_pacman(-PACMAN_SPEED, 0)
+            elif keys[pygame.K_RIGHT]:
+                self.move_pacman(PACMAN_SPEED, 0)
+            elif keys[pygame.K_UP]:
+                self.move_pacman(0, -PACMAN_SPEED)
+            elif keys
